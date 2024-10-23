@@ -8,6 +8,7 @@ class App {
     public $app_folder;
     public $http_host;
     public $urls;
+    public $uri;
     public $method;
 
     private $jwtService;
@@ -18,7 +19,11 @@ class App {
         $uri = $_SERVER['REQUEST_URI'];
         $app_folder = str_replace('/index.php', '', $_SERVER["SCRIPT_NAME"]);
         $http_host = $_SERVER['REQUEST_SCHEME'].'://'.$_SERVER['SERVER_NAME'].$app_folder;
-        $url = str_replace($app_folder.'/', '', $uri);
+        $url = $uri;
+        while (strpos($url, '//') !== false) {
+            $url = str_replace('//', '/', $url);
+        }
+        $url = str_replace('noithemdeloai'.$app_folder.'/', '', "noithemdeloai".$url);
         $url = explode('?', $url)['0'];
         $url = rtrim($url, '/');
         $urls = explode('/', $url);
@@ -28,6 +33,7 @@ class App {
         $this->app_folder = $app_folder;
         $this->http_host = $http_host;
         $this->urls = $urls;
+        $this->uri = $uri;
         $this->method = $method;
         $this->jwtService = new JwtService();
 
@@ -38,7 +44,8 @@ class App {
     }
 
     public function getmethod() {
-        return $this->method;
+        $methodNew = $this->method;
+        return $methodNew;
     }
 
     public function convertDate($date) {
@@ -128,16 +135,39 @@ class App {
         return $decoded;
     }
 
+    // get header Authorization 
+    public function getHeaderAuthorization() {
+        $headers = getallheaders();
+        if (!isset($headers['Authorization'])) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Authorization header missing']);
+            exit();
+        }
 
-    public function run() {
+        // Tách chuỗi 'Bearer <token>'
+        $authHeader = $headers['Authorization'];
+        if (strpos($authHeader, 'Bearer ') !== 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid Authorization header']);
+            exit();
+        }
+
+        // Lấy JWT từ header
+        $jwt = substr($authHeader, 7);
+
+        return $jwt;
+    }
+
+
+    public function run() { 
         if (count($this->urls) == 0 || $this->urls[0] == '') {
-            include $this->root.'/views/404.php';
+            include 'views/404.php';
         } elseif (count($this->urls) > 0)  {
-            $path_page = $this->root.'/views/'.$this->urls[0].'.php';
+            $path_page = 'views/'.$this->urls[0].'.php';
             if(file_exists($path_page)) {
                 require $path_page;
             } else {
-                include $this->root.'/views/404.php';
+                include 'views/404.php';
             }
         }
         

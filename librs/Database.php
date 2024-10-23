@@ -5,6 +5,11 @@ class Database {
 
     function __construct() {
         $this->conn = mysqli_connect(HOST, USER, PASSWORD, DB);
+        if (!$this->conn) {
+            die("Connection failed: " . mysqli_connect_error());
+        }
+
+        mysqli_set_charset($this->conn, "utf8");
     }
 
     public static function select($select = "*") {
@@ -113,8 +118,11 @@ class Database {
         return $query->fetch_object();
     }
 
-    public static function createMoreTbl($data, $table) {
+    public static function createResultId($data, $table = '') {
         $_this = new static();
+        if ($table == '') {
+            $table = $_this->table;
+        }
         $keys = array_keys($data);
         $keys = implode("`, `", $keys);
         $values = array_values($data);
