@@ -93,6 +93,7 @@ class Database {
         }
         $sql = rtrim($sql, ", ");
         $sql.= " WHERE `$keyID[0]` = '$valueID[0]'";
+        echo $sql;
         $query = $_this->conn->query($sql);
         $_this->conn->close();
         return $query;
