@@ -92,9 +92,9 @@ class DataProcessor {
                     "diengiai" => $data["desc"] ?? null
                 ];
                 if (!is_numeric($id)) {
-                    $idArrays[$id] = Categories::create($this->removeDataNull($dataPrepare));
+                    $idArrays[$id] = Categories::createResultId($this->removeDataNull($dataPrepare));
                 } else {
-                    Categories::createResultId($this->removeDataNull($dataPrepare));
+                    Categories::create($this->removeDataNull($dataPrepare));
                 }
                 break;
 
@@ -141,17 +141,34 @@ class DataProcessor {
 
             case 'category':
                 $updates['category'] = true;
-                $dataPrepare = [
-                    "tenhangmuc" => $data["name"],
-                    "icon" => $data["icon"],
-                    "iconlib" => $data["iconLib"],
-                    "loaihangmuc" => $data["type"],
-                    "id_CategoryReplace" => $data["ReplaceId"] ?? null,
-                    "hanmuccha" => $data["categoryParentId"] ?? 0,
-                    "diengiai" => $data["desc"] ?? null
-                ];
-                $this->assignIfKeyExists($id, $id, $idArrays);
-                Categories::update(["id" => $id], $this->removeDataNull($dataPrepare));
+                $uidUser = Categories::find(["id" => $id], '`id_user`')->id_user;
+                if ($uidUser === $idUser) {
+                    $dataPrepare = [
+                        "tenhangmuc" => $data["name"],
+                        "icon" => $data["icon"],
+                        "iconlib" => $data["iconLib"],
+                        "loaihangmuc" => $data["type"],
+                        "id_CategoryReplace" => $data["ReplaceId"] ?? null,
+                        "hanmuccha" => $data["categoryParentId"] ?? 0,
+                        "diengiai" => $data["desc"] ?? null
+                    ];
+                    $this->assignIfKeyExists($id, $id, $idArrays);
+                    Categories::update(["id" => $id], $this->removeDataNull($dataPrepare));
+                    
+                } else {
+                    $dataPrepare = [
+                        "id_user" => $idUser,
+                        "tenhangmuc" => $data["name"],
+                        "icon" => $data["icon"],
+                        "iconlib" => $data["iconLib"],
+                        "loaihangmuc" => $data["type"],
+                        "id_CategoryReplace" => $id ?? null,
+                        "hanmuccha" => $data["categoryParentId"] ?? 0,
+                        "diengiai" => $data["desc"] ?? null
+                    ];
+                    
+                    Categories::create($this->removeDataNull($dataPrepare));
+                }
                 break;
 
             case 'transaction':
@@ -181,7 +198,6 @@ class DataProcessor {
                 break;
 
             case 'category':
-              echo "hello world";
                 $updates['category'] = true;
                 $this->assignIfKeyExists($id, $id, $idArrays);
                 Categories::delete(["id" => $id]);
