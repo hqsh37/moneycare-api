@@ -4,7 +4,7 @@
 if ($this->getmethod() === "GET" && count($this->urls) == 2) {
     if ($this->urls[1] === "default") {
         $categorys = Categories::finds(["id_user" => 0]);
-        
+
         if ($categorys) {
             http_response_code(200);
             echo json_encode([
@@ -24,14 +24,13 @@ if ($this->getmethod() === "GET" && count($this->urls) == 2) {
             ["status" => "error", "message" => "Not found"]
         );
     }
-    
 } else if ($this->getmethod() === "GET" && count($this->urls) == 1) {
     $jwt = $this->getHeaderAuthorization();
     $user = $this->validateToken($jwt);
     if ($user) {
-        
+
         $categorys = Categories::finds(["id_user" => $user["uid"]]);
-        
+
         if ($categorys) {
             http_response_code(200);
             echo json_encode([
@@ -45,14 +44,12 @@ if ($this->getmethod() === "GET" && count($this->urls) == 2) {
                 ["status" => "success", "message" => "No data available"]
             );
         }
-
     } else {
         http_response_code(401);
         echo json_encode(
             ["status" => "error", "message" => "JWT token not valid"]
         );
     }
-
 }
 
 // [POST] accounts/
@@ -73,7 +70,7 @@ if ($this->getmethod() === "POST") {
             "diengiai" => $diengiai
         ];
         $account = Account::create($data);
-        
+
         if ($account) {
             http_response_code(201);
             echo json_encode([
@@ -86,7 +83,6 @@ if ($this->getmethod() === "POST") {
                 ["status" => "error", "message" => "Registration failed"]
             );
         }
-
     } else {
         http_response_code(401);
         echo json_encode(
@@ -101,7 +97,7 @@ if ($this->getmethod() === "PUT" && count($this->urls) == 2) {
 
     $jsonBody = file_get_contents('php://input');
     $data = json_decode($jsonBody, true);
-    
+
     if (json_last_error() !== JSON_ERROR_NONE) {
         http_response_code(400);
         echo json_encode(['error' => 'Invalid JSON format']);
@@ -114,7 +110,7 @@ if ($this->getmethod() === "PUT" && count($this->urls) == 2) {
     $diengiai = $data['diengiai'] ?? null;
 
     if (!$tentaikhoan || !$loaitaikhoan || !$sotien) {
-        http_response_code(400); 
+        http_response_code(400);
         echo json_encode(['error' => 'Missing required fields']);
         exit();
     }

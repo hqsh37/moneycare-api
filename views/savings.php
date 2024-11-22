@@ -5,14 +5,14 @@ if ($this->getmethod() === "GET") {
     $jwt = $this->getHeaderAuthorization();
     $user = $this->validateToken($jwt);
     if ($user) {
-        $account = Savings::finds(["id_taikhoan" => $user["uid"]]);
-        
-        if ($account) {
+        $savings = Savings::findAllSavings($user["uid"]);
+
+        if ($savings) {
             http_response_code(200);
             echo json_encode([
                 "status" => "success",
                 "message" => "Registration successful",
-                "data" => $account
+                "data" => $savings
             ]);
         } else {
             http_response_code(204);
@@ -20,7 +20,6 @@ if ($this->getmethod() === "GET") {
                 ["status" => "success", "message" => "No data available"]
             );
         }
-
     } else {
         http_response_code(401);
         echo json_encode(
@@ -54,7 +53,7 @@ if ($this->getmethod() === "POST") {
             "diengiai" => $diengiai
         ];
         $account = Account::create($data);
-        
+
         if ($account) {
             http_response_code(201);
             echo json_encode([
@@ -67,7 +66,6 @@ if ($this->getmethod() === "POST") {
                 ["status" => "error", "message" => "Registration failed"]
             );
         }
-
     } else {
         http_response_code(401);
         echo json_encode(

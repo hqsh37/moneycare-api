@@ -7,19 +7,17 @@ if ($this->getmethod() === "POST") {
   $jsonString = file_get_contents('php://input');
 
   if (DataProcessor::processData($jsonString, $user["uid"])) {
-    $user = Auth::find(["id" => 2], $select = "`categoryAt`, `accountAt`, `transactionAt`");
+    $user = Auth::find(["id" => 2], $select = "`categoryAt`, `accountAt`, `transactionAt`, `savingsAt`");
     http_response_code(200);
     echo json_encode([
-        "status" => "success",
-        "message" => "Registration successful",
-        "data" => $user,
+      "status" => "success",
+      "message" => "Registration successful",
+      "data" => $user,
     ]);
-
   } else {
     http_response_code(400);
     echo json_encode(
-        ["status" => "error", "message" => "Registration failed"]
+      ["status" => "error", "message" => "Registration failed"]
     );
   }
-
 }
