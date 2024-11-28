@@ -72,6 +72,7 @@ class DataProcessor
             'category' => false,
             'account' => false,
             'transaction' => false,
+            'savings' => false,
         ];
 
         foreach ($jsonData as $operation) {
@@ -109,9 +110,9 @@ class DataProcessor
                 $updates['account'] = true;
                 $dataPrepare = [
                     "id_user" => $idUser,
-                    "tentaikhoan" => $data["name"],
-                    "loaitaikhoan" => $data["type"],
-                    "sotien" => $data["balance"],
+                    "tentaikhoan" => $data["name"] ?? null,
+                    "loaitaikhoan" => $data["type"] ?? null,
+                    "sotien" => $data["balance"] ?? null,
                     "diengiai" => $data["desc"] ?? null
                 ];
                 if (!is_numeric($id)) {
@@ -125,12 +126,12 @@ class DataProcessor
                 $updates['category'] = true;
                 $dataPrepare = [
                     "id_user" => $idUser,
-                    "tenhangmuc" => $data["name"],
-                    "icon" => $data["icon"],
-                    "iconlib" => $data["iconLib"],
-                    "loaihangmuc" => $data["type"],
+                    "tenhangmuc" => $data["name"] ?? null,
+                    "icon" => $data["icon"] ?? null,
+                    "iconlib" => $data["iconLib"] ?? null,
+                    "loaihangmuc" => $data["type"] ?? null,
                     "id_CategoryReplace" => $data["ReplaceId"] ?? null,
-                    "hanmuccha" => $data["categoryParentId"] ?? 0,
+                    "hanmuccha" => $data["categoryParentId"] ?? null,
                     "diengiai" => $data["desc"] ?? null
                 ];
                 if (!is_numeric($id)) {
@@ -143,12 +144,12 @@ class DataProcessor
             case 'transaction':
                 $updates['transaction'] = true;
                 $dataPrepare = [
-                    "id_taikhoan" => $data["accountId"],
-                    "id_hangmuc" => $data["categoryId"],
-                    "sotien" => $data["amount"],
-                    "thoigian" => $this->convertToMySQLDateTime($data["date"]),
+                    "id_taikhoan" => $data["accountId"] ?? null,
+                    "id_hangmuc" => $data["categoryId"] ?? null,
+                    "sotien" => $data["amount"] ?? null,
+                    "thoigian" => $this->convertToMySQLDateTime($data["date"]) ?? null,
                     "hinhanh" => $data["image"] ?? null,
-                    "loaigiaodich" => $data["type"],
+                    "loaigiaodich" => $data["type"] ?? null,
                     "diengiai" => $data["desc"] ?? null
                 ];
 
@@ -165,14 +166,14 @@ class DataProcessor
             case 'savings':
                 $updates['savings'] = true;
                 $dataPrepare = [
-                    "id_taikhoan" => $data["accountId"],
-                    "sodubandau" => $data["amount"],
-                    "tenso" => $data["name"],
-                    "ngaygui" => $this->convertToMySQLDateTime($data["date"]),
-                    "kyhan" => $data["term"],
-                    "laisuat" => $data["interestRate"],
-                    "loailaisuat" => $data["interestType"],
-                    "sotientattoan" => $data["settlementAmount"],
+                    "id_taikhoan" => $data["accountId"] ?? null,
+                    "sodubandau" => $data["amount"] ?? null,
+                    "tenso" => $data["name"] ?? null,
+                    "ngaygui" => $this->convertToMySQLDateTime($data["date"]) ?? null,
+                    "kyhan" => $data["term"] ?? null,
+                    "laisuat" => $data["interestRate"] ?? null,
+                    "loailaisuat" => $data["interestType"] ?? null,
+                    "sotientattoan" => $data["settlementAmount"] ?? null,
                     "trangthai" => $data["status"] ?? "active",
                 ];
                 if (!is_numeric($id)) {
@@ -189,12 +190,22 @@ class DataProcessor
         $dataPrepare = [];
 
         switch ($tbl) {
+            case 'amount':
+                $updates['account'] = true;
+                $amount =  $data["amount"];
+                $id =  $data["id"];
+
+                $this->assignIfKeyExists($id, $id, $idArrays);
+                Account::updateAmount($id, $amount);
+
+                break;
+
             case 'account':
                 $updates['account'] = true;
                 $dataPrepare = [
-                    "tentaikhoan" => $data["name"],
-                    "loaitaikhoan" => $data["type"],
-                    "sotien" => $data["balance"],
+                    "tentaikhoan" => $data["name"] ?? null,
+                    "loaitaikhoan" => $data["type"] ?? null,
+                    "sotien" => $data["balance"] ?? null,
                     "diengiai" => $data["desc"] ?? null
                 ];
                 $this->assignIfKeyExists($id, $id, $idArrays);
@@ -206,12 +217,12 @@ class DataProcessor
                 $uidUser = Categories::find(["id" => $id], '`id_user`')->id_user;
                 if ($uidUser === $idUser) {
                     $dataPrepare = [
-                        "tenhangmuc" => $data["name"],
-                        "icon" => $data["icon"],
-                        "iconlib" => $data["iconLib"],
-                        "loaihangmuc" => $data["type"],
+                        "tenhangmuc" => $data["name"] ?? null,
+                        "icon" => $data["icon"] ?? null,
+                        "iconlib" => $data["iconLib"] ?? null,
+                        "loaihangmuc" => $data["type"] ?? null,
                         "id_CategoryReplace" => $data["ReplaceId"] ?? null,
-                        "hanmuccha" => $data["categoryParentId"] ?? 0,
+                        "hanmuccha" => $data["categoryParentId"] ?? null,
                         "diengiai" => $data["desc"] ?? null
                     ];
                     $this->assignIfKeyExists($id, $id, $idArrays);
@@ -219,12 +230,12 @@ class DataProcessor
                 } else {
                     $dataPrepare = [
                         "id_user" => $idUser,
-                        "tenhangmuc" => $data["name"],
-                        "icon" => $data["icon"],
-                        "iconlib" => $data["iconLib"],
-                        "loaihangmuc" => $data["type"],
+                        "tenhangmuc" => $data["name"] ?? null,
+                        "icon" => $data["icon"] ?? null,
+                        "iconlib" => $data["iconLib"] ?? null,
+                        "loaihangmuc" => $data["type"] ?? null,
                         "id_CategoryReplace" => $id ?? null,
-                        "hanmuccha" => $data["categoryParentId"] ?? 0,
+                        "hanmuccha" => $data["categoryParentId"] ?? null,
                         "diengiai" => $data["desc"] ?? null
                     ];
 
@@ -235,12 +246,12 @@ class DataProcessor
             case 'transaction':
                 $updates['transaction'] = true;
                 $dataPrepare = [
-                    "id_taikhoan" => $data["accountId"],
-                    "id_hangmuc" => $data["categoryId"],
-                    "sotien" => $data["amount"],
-                    "thoigian" => $this->convertToMySQLDateTime($data["date"]),
+                    "id_taikhoan" => $data["accountId"] ?? null,
+                    "id_hangmuc" => $data["categoryId"] ?? null,
+                    "sotien" => $data["amount"] ?? null,
+                    "thoigian" => $this->convertToMySQLDateTime($data["date"]) ?? null,
                     "hinhanh" => $data["image"] ?? null,
-                    "loaigiaodich" => $data["type"],
+                    "loaigiaodich" => $data["type"] ?? null,
                     "diengiai" => $data["desc"] ?? null
                 ];
                 $this->assignIfKeyExists($id, $id, $idArrays);
@@ -253,14 +264,14 @@ class DataProcessor
             case 'savings':
                 $updates['savings'] = true;
                 $dataPrepare = [
-                    "id_taikhoan" => $data["accountId"],
-                    "sodubandau" => $data["amount"],
-                    "tenso" => $data["name"],
-                    "ngaygui" => $this->convertToMySQLDateTime($data["date"]),
-                    "kyhan" => $data["term"],
-                    "laisuat" => $data["interestRate"],
-                    "loailaisuat" => $data["interestType"],
-                    "sotientattoan" => $data["settlementAmount"],
+                    "id_taikhoan" => $data["accountId"] ?? null,
+                    "sodubandau" => $data["amount"] ?? null,
+                    "tenso" => $data["name"] ?? null,
+                    "ngaygui" => $this->convertToMySQLDateTime($data["date"]) ?? null,
+                    "kyhan" => $data["term"] ?? null,
+                    "laisuat" => $data["interestRate"] ?? null,
+                    "loailaisuat" => $data["interestType"] ?? null,
+                    "sotientattoan" => $data["settlementAmount"] ?? null,
                     "trangthai" => $data["status"] ?? "active",
                 ];
                 $this->assignIfKeyExists($id, $id, $idArrays);

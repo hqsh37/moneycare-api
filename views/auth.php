@@ -5,12 +5,12 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
     $jwt = $this->getHeaderAuthorization();
     $user = $this->validateToken($jwt);
 
-    $userPare = [   
+    $userPare = [
         'email' => $user['email'],
         'id' => $user["uid"],
     ];
 
-    $result = Auth::find($userPare, '`firstname`, `lastname`, `email`, `categoryAt`, `accountAt`, `transactionAt`');
+    $result = Auth::find($userPare, '`firstname`, `lastname`, `email`, `categoryAt`, `accountAt`, `transactionAt`, `savingsAt`');
 
 
     if ($result) {
@@ -46,7 +46,7 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
         "email" => $email,
     ]);
 
-    if($checkEmail) {
+    if ($checkEmail) {
         http_response_code(400);
         echo json_encode(
             ["status" => "error", "message" => "Email has exited"]
@@ -54,7 +54,7 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
     } else {
         $result = Auth::create($user);
 
-        if($result) {   
+        if ($result) {
             http_response_code(200);
             echo json_encode(
                 ["status" => "success", "message" => "Registration successful"]
@@ -66,7 +66,6 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
             );
         }
     }
-
 }
 
 // [POST]auth/login
@@ -80,20 +79,20 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
 
     $result = Auth::find($user);
 
-    if($result) {
+    if ($result) {
         if (password_verify(trim($password), $result->password)) {
             $data = [
                 'id' => $result->id,
                 'email' => $result->email,
             ];
-        
+
             $jwt = $this->createToken($data);
             Auth::update(["id" => $result->id], ["session" => $jwt]);
 
             http_response_code(200);
             echo json_encode([
                 "status" => "success",
-                "message" => "Login successful", 
+                "message" => "Login successful",
                 'data' => [
                     'token' => $jwt
                 ]
@@ -111,18 +110,17 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
             ["status" => "error", "message" => "Registration failed {$result}"]
         );
     }
-
 }
 
 // [POST]auth/logout
 if ($this->getmethod() === "POST" && count($this->urls) && $this->urls[1] === "logout") {
-    
+
     $jwt = $this->getHeaderAuthorization();
     $user = $this->validateToken($jwt);
 
     $result = Auth::find($user);
 
-    if($result) {
+    if ($result) {
         $data = [
             'id' => $result->id,
             'email' => $result->email,
@@ -132,14 +130,14 @@ if ($this->getmethod() === "POST" && count($this->urls) && $this->urls[1] === "l
         http_response_code(200);
         echo json_encode([
             "status" => "success",
-            "message" => "Registration successful"]);
+            "message" => "Registration successful"
+        ]);
     } else {
         http_response_code(400);
         echo json_encode(
             ["status" => "error", "message" => "Registration failed"]
         );
     }
-
 }
 
 // [POST]auth/forgot
@@ -153,8 +151,8 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
 
     $result = Auth::find($user);
 
-    if($result) {
-        if(!!!password_verify($password, $result->password)) {
+    if ($result) {
+        if (!!!password_verify($password, $result->password)) {
             $data = [
                 'id' => $result->id,
                 'email' => $result->email,
@@ -164,7 +162,7 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
             http_response_code(200);
             echo json_encode([
                 "status" => "success",
-                "message" => "Registration successful", 
+                "message" => "Registration successful",
                 'data' => [
                     'token' => $jwt
                 ]
@@ -181,5 +179,4 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
             ["status" => "error", "message" => "Registration failed {$result}"]
         );
     }
-
 }

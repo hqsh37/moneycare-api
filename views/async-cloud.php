@@ -7,7 +7,7 @@ if ($this->getmethod() === "POST") {
   $jsonString = file_get_contents('php://input');
 
   if (DataProcessor::processData($jsonString, $user["uid"])) {
-    $user = Auth::find(["id" => 2], $select = "`categoryAt`, `accountAt`, `transactionAt`, `savingsAt`");
+    $user = Auth::find(["id" => $user["uid"]], $select = "`categoryAt`, `accountAt`, `transactionAt`, `savingsAt`");
     http_response_code(200);
     echo json_encode([
       "status" => "success",
