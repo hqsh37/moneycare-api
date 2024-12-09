@@ -330,7 +330,7 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
 
         $otp = Auth::update(["id" => $result->id], ["otp" => $randomNumbers]);
         if ($otp) {
-            $this->sendmail('hqsh37@gmail.com', 'hqsh37', 'Đặt lại mật khẩu', $content_mail);
+            $this->sendmail($result->email, $result->lastname, 'Đặt lại mật khẩu', $content_mail);
             http_response_code(200);
             echo json_encode([
                 "status" => "success",
@@ -354,7 +354,7 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
 // [POST]auth/otp
 if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] === "otp") {
     $email = $_REQUEST["email"] ?? "";
-    $otp = $_REQUEST["otp"] ?? null;
+    $otp = $_REQUEST["otp"] ?? "";
 
     $user = [
         'email' => $email,
@@ -363,7 +363,7 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
 
     $result = Auth::find($user);
 
-    if ($result) {
+    if ($result && $otp) {
         $otpRemove = Auth::update(["id" => $result->id], ["otp" => ""]);
 
         if ($otpRemove) {
@@ -393,5 +393,54 @@ if ($this->getmethod() === "POST" && count($this->urls) == 2 && $this->urls[1] =
         echo json_encode(
             ["status" => "error", "message" => "Registration failed {$result}"]
         );
+    }
+}
+
+
+// [POST]auth/reset-password
+if ($this->getMethod() === "POST" && count($this->urls) == 2 && $this->urls[1] === "reset-password") {
+    $jwt = $this->getHeaderAuthorization();
+    $user = $this->validateToken($jwt);
+
+    $passwordNew = trim($_REQUEST["password"] ?? '');
+
+    // Validate input
+    if (empty($passwordNew)) {
+        http_response_code(400);
+        echo json_encode([
+            "status" => "error",
+            "message" => "Both current and new passwords are required.",
+        ]);
+        exit;
+    }
+
+    // Find the user
+    $userParams = [
+        'email' => $user['email'],
+        'id' => $user["uid"],
+    ];
+    $result = Auth::find($userParams);
+
+    if ($result) {
+        // Update the password
+        Auth::update(
+            ["id" => $result->id],
+            ['password' => password_hash($passwordNew, PASSWORD_DEFAULT)]
+        );
+
+        http_response_code(200);
+        echo json_encode([
+            "status" => "success",
+            "message" => "Password changed successfully.",
+            'data' => [
+                'token' => $jwt
+            ]
+        ]);
+    } else {
+        http_response_code(400);
+        echo json_encode([
+            "status" => "error",
+            "message" => "User not found.",
+        ]);
     }
 }
